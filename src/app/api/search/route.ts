@@ -71,6 +71,19 @@ type Place = {
   tags: Record<string, string>;
 };
 
+type OverpassResponse = {
+  elements?: OverpassElement[];
+};
+
+const OVERPASS_ENDPOINTS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.openstreetmap.fr/api/interpreter",
+  "https://overpass.osm.ch/api/interpreter",
+] as const;
+
+const OVERPASS_FETCH_TIMEOUT_MS = 12_000;
+
 const CATEGORIES: Category[] = [
   { key: "restaurant", label: "Restaurant", tags: [{ key: "amenity", value: "restaurant" }] },
   { key: "cafe", label: "Cafe", tags: [{ key: "amenity", value: "cafe" }] },
@@ -195,35 +208,56 @@ const buildOverpassQuery = (category: Category, bbox: [string, string, string, s
   const [south, north, west, east] = bbox;
   const bounds = `${south},${west},${north},${east}`;
   const clauses = category.tags
-    .flatMap((tag) => [
-      `node["${tag.key}"="${escapeOverpassValue(tag.value)}"](${bounds});`,
-      `way["${tag.key}"="${escapeOverpassValue(tag.value)}"](${bounds});`,
-      `relation["${tag.key}"="${escapeOverpassValue(tag.value)}"](${bounds});`,
-    ])
+    .map((tag) => `nwr["${tag.key}"="${escapeOverpassValue(tag.value)}"](${bounds});`)
     .join("\n");
 
-  return `[out:json][timeout:25];
+  return `[out:json][timeout:12];
 (
 ${clauses}
 );
 out center;`;
 };
 
-const queryOverpass = async (category: Category, bbox: [string, string, string, string]) => {
-  const response = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-    },
-    body: new URLSearchParams({ data: buildOverpassQuery(category, bbox) }),
-  });
+const fetchOverpassEndpoint = async (
+  endpoint: string,
+  query: string,
+): Promise<OverpassResponse> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), OVERPASS_FETCH_TIMEOUT_MS);
 
-  if (!response.ok) {
-    throw new Error("Overpass API could not complete the search. Try again in a moment.");
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+      },
+      body: new URLSearchParams({ data: query }),
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Overpass endpoint returned ${response.status}.`);
+    }
+
+    return (await response.json()) as OverpassResponse;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
+
+const queryOverpass = async (category: Category, bbox: [string, string, string, string]) => {
+  const query = buildOverpassQuery(category, bbox);
+
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      return await fetchOverpassEndpoint(endpoint, query);
+    } catch {
+      continue;
+    }
   }
 
-  return (await response.json()) as { elements?: OverpassElement[] };
+  throw new Error("Map search is busy right now. Please try again in a moment.");
 };
 
 const formatAddress = (tags: Record<string, string>) => {

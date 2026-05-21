@@ -218,7 +218,7 @@ const CATEGORIES: Category[] = [
 const DEFAULT_CATEGORY = CATEGORIES[0].key;
 
 const textInputClass =
-  "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100";
+  "h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-950 shadow-sm shadow-slate-200/50 outline-none transition placeholder:font-normal placeholder:text-slate-400 hover:border-slate-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400";
 
 const getCategory = (key: CategoryKey) =>
   CATEGORIES.find((category) => category.key === key) ?? CATEGORIES[0];
@@ -467,176 +467,198 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f7fbf8] text-slate-950">
-      <section className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_400px] lg:items-end">
-            <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-teal-700 ring-1 ring-teal-100">
+    <main className="min-h-screen bg-slate-50 text-slate-950">
+      <section className="relative overflow-hidden bg-[radial-gradient(circle_at_top_left,#ccfbf1_0,#f8fafc_34%,#ffffff_70%)]">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-400 to-sky-500" />
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-7 px-4 pb-7 pt-10 sm:px-6 sm:pb-9 sm:pt-12 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
+            <div className="space-y-6">
+              <div className="inline-flex w-fit items-center gap-2 rounded-full border border-teal-200/70 bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-teal-800 shadow-sm shadow-teal-100/70">
                 OpenStreetMap Business Finder
               </div>
-              <div className="max-w-3xl space-y-4">
-                <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-                  Find Thai places by province, district, and category.
+              <div className="max-w-4xl space-y-4">
+                <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
+                  Find Thai businesses with local precision.
                 </h1>
-                <p className="text-base leading-7 text-slate-600 sm:text-lg">
-                  Search restaurants, services, lodging, health care, retail, and everyday
-                  essentials using public OpenStreetMap data.
+                <p className="max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+                  Search public map data by province, district, subdistrict, category,
+                  and optional keyword in one focused workflow.
                 </p>
+              </div>
+              <div className="flex flex-wrap gap-2.5 text-sm font-medium text-slate-700">
+                {["Live OSM data", "Cascading Thai geography", "Category-aware results"].map(
+                  (feature) => (
+                    <span
+                      key={feature}
+                      className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/75 px-3 py-1.5 shadow-sm"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
+                      {feature}
+                    </span>
+                  ),
+                )}
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-2xl bg-slate-950 p-4 text-white shadow-lg shadow-slate-200">
-                <div className="text-2xl font-semibold">77</div>
-                <div className="mt-1 text-xs text-slate-300">Thai provinces</div>
-              </div>
-              <div className="rounded-2xl bg-teal-600 p-4 text-white shadow-lg shadow-teal-100">
-                <div className="text-2xl font-semibold">{CATEGORIES.length}</div>
-                <div className="mt-1 text-xs text-teal-50">Categories</div>
-              </div>
-              <div className="rounded-2xl bg-white p-4 text-slate-950 shadow-lg shadow-slate-200 ring-1 ring-slate-200">
-                <div className="text-2xl font-semibold">{places.length}</div>
-                <div className="mt-1 text-xs text-slate-500">Results now</div>
-              </div>
+            <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
+              {[
+                ["77", "Thai provinces", "bg-slate-950 text-white"],
+                [String(CATEGORIES.length), "Search categories", "bg-teal-600 text-white"],
+                [String(places.length), "Results now", "bg-white text-slate-950 ring-1 ring-slate-200"],
+              ].map(([value, label, className]) => (
+                <div
+                  key={label}
+                  className={`rounded-2xl p-4 shadow-lg shadow-slate-200/70 ${className}`}
+                >
+                  <div className="text-2xl font-semibold tracking-tight">{value}</div>
+                  <div className="mt-1 text-xs font-medium opacity-75">{label}</div>
+                </div>
+              ))}
             </div>
           </div>
 
           <form
             onSubmit={handleSearch}
-            className="grid gap-3 rounded-[2rem] border border-slate-200 bg-slate-50 p-3 shadow-xl shadow-slate-200/70 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_auto]"
+            className="rounded-3xl border border-white/80 bg-white/90 p-4 shadow-2xl shadow-slate-200/70 backdrop-blur md:p-5"
           >
-            <label className="space-y-2">
-              <span className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Province
-              </span>
-              <select
-                className={textInputClass}
-                disabled={geographyLoading || provinces.length === 0}
-                value={province}
-                onChange={(event) => handleProvinceChange(event.target.value)}
-              >
-                {provinces.map((thaiProvince) => (
-                  <option key={thaiProvince} value={thaiProvince}>
-                    {thaiProvince}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_auto] xl:items-end">
+              <label className="space-y-2">
+                <span className="px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Province
+                </span>
+                <select
+                  className={textInputClass}
+                  disabled={geographyLoading || provinces.length === 0}
+                  value={province}
+                  onChange={(event) => handleProvinceChange(event.target.value)}
+                >
+                  {provinces.map((thaiProvince) => (
+                    <option key={thaiProvince} value={thaiProvince}>
+                      {thaiProvince}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label className="space-y-2">
-              <span className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                District
-              </span>
-              <select
-                className={textInputClass}
-                disabled={geographyLoading || districts.length === 0}
-                value={district}
-                onChange={(event) => handleDistrictChange(event.target.value)}
-              >
-                {districts.map((thaiDistrict) => (
-                  <option key={thaiDistrict} value={thaiDistrict}>
-                    {thaiDistrict}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <label className="space-y-2">
+                <span className="px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  District
+                </span>
+                <select
+                  className={textInputClass}
+                  disabled={geographyLoading || districts.length === 0}
+                  value={district}
+                  onChange={(event) => handleDistrictChange(event.target.value)}
+                >
+                  {districts.map((thaiDistrict) => (
+                    <option key={thaiDistrict} value={thaiDistrict}>
+                      {thaiDistrict}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label className="space-y-2">
-              <span className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Subdistrict
-              </span>
-              <select
-                className={textInputClass}
-                disabled={geographyLoading || subdistricts.length === 0}
-                value={subdistrict}
-                onChange={(event) => setSubdistrict(event.target.value)}
-              >
-                {subdistricts.map((thaiSubdistrict) => (
-                  <option key={thaiSubdistrict} value={thaiSubdistrict}>
-                    {thaiSubdistrict}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <label className="space-y-2">
+                <span className="px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Subdistrict
+                </span>
+                <select
+                  className={textInputClass}
+                  disabled={geographyLoading || subdistricts.length === 0}
+                  value={subdistrict}
+                  onChange={(event) => setSubdistrict(event.target.value)}
+                >
+                  {subdistricts.map((thaiSubdistrict) => (
+                    <option key={thaiSubdistrict} value={thaiSubdistrict}>
+                      {thaiSubdistrict}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label className="space-y-2">
-              <span className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Keyword
-              </span>
-              <input
-                className={textInputClass}
-                placeholder="optional name or tag"
-                type="text"
-                value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-              />
-            </label>
+              <label className="space-y-2">
+                <span className="px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Keyword
+                </span>
+                <input
+                  className={textInputClass}
+                  placeholder="Name or tag, optional"
+                  type="text"
+                  value={keyword}
+                  onChange={(event) => setKeyword(event.target.value)}
+                />
+              </label>
 
-            <button
-              className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-6 text-sm font-semibold text-white shadow-lg shadow-slate-300 transition hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-400 lg:mt-8"
-              disabled={loading || geographyLoading || !province || !district || !subdistrict}
-              type="submit"
-            >
-              <svg
-                aria-hidden="true"
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
+              <button
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-semibold text-white shadow-lg shadow-slate-300/80 transition hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-teal-200 focus:outline-none focus:ring-4 focus:ring-teal-100 disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none"
+                disabled={loading || geographyLoading || !province || !district || !subdistrict}
+                type="submit"
               >
-                <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
-              </svg>
-              {loading ? "Searching" : geographyLoading ? "Loading" : "Search"}
-            </button>
+                <svg
+                  aria-hidden="true"
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+                </svg>
+                {loading ? "Searching" : geographyLoading ? "Loading" : "Search places"}
+              </button>
+            </div>
           </form>
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
+      <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-7 sm:px-6 lg:grid-cols-[340px_1fr] lg:px-8">
         <aside className="space-y-5">
-          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Category
-              </h2>
-              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">
+              <div>
+                <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Category
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">Choose one point-of-interest group.</p>
+              </div>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
                 POI tags
               </span>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
               {CATEGORIES.map((category) => {
                 const active = category.key === categoryKey;
 
                 return (
                   <button
                     key={category.key}
-                    className={`flex min-h-12 items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm font-medium transition ${
+                    className={`group flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-semibold transition ${
                       active
-                        ? "bg-slate-950 text-white shadow-md"
-                        : "bg-slate-50 text-slate-700 hover:bg-teal-50 hover:text-teal-800"
+                        ? "border-slate-900 bg-slate-950 text-white shadow-md shadow-slate-200"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50/70 hover:text-teal-900"
                     }`}
                     type="button"
                     onClick={() => setCategoryKey(category.key)}
                   >
                     <span
-                      className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ${
-                        active ? "bg-white/10 ring-white/20" : category.tone
+                      className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 transition ${
+                        active
+                          ? "bg-white/10 text-white ring-white/20"
+                          : `${category.tone} group-hover:bg-white`
                       }`}
                     >
                       <InfoIcon path={category.icon} />
                     </span>
-                    <span>{category.label}</span>
+                    <span className="min-w-0">{category.label}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="rounded-3xl border border-teal-100 bg-teal-50 p-5 text-sm leading-6 text-teal-900">
+          <div className="rounded-3xl border border-teal-100 bg-gradient-to-br from-teal-50 to-emerald-50 p-5 text-sm leading-6 text-teal-950 shadow-sm">
             <div className="mb-2 font-semibold">Data note</div>
             OpenStreetMap is community maintained. Names, hours, phone numbers, and
             websites can be incomplete, outdated, or missing in some districts.
@@ -644,31 +666,31 @@ export default function Home() {
         </aside>
 
         <section className="space-y-5">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
                 <h2 className="text-2xl font-semibold tracking-tight">
                   {searched ? `${places.length} result${places.length === 1 ? "" : "s"}` : "Ready to search"}
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
                   {scopeNote || "Choose a province, district, subdistrict, and category to query live map data."}
                 </p>
               </div>
-              <div className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ${selectedCategory.tone}`}>
+              <div className={`inline-flex w-fit shrink-0 items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ${selectedCategory.tone}`}>
                 <InfoIcon path={selectedCategory.icon} />
                 {selectedCategory.label}
               </div>
             </div>
 
             {boundaryName ? (
-              <div className="mt-4 rounded-2xl bg-slate-50 p-3 text-xs leading-5 text-slate-500">
-                Boundary: {boundaryName}
+              <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs leading-5 text-slate-600">
+                <span className="font-semibold text-slate-700">Boundary:</span> {boundaryName}
               </div>
             ) : null}
           </div>
 
           {error ? (
-            <div className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800">
+            <div className="rounded-3xl border border-red-200 bg-red-50 p-5 text-sm leading-6 text-red-800 shadow-sm">
               <div className="font-semibold">Search error</div>
               {error}
             </div>
@@ -679,22 +701,28 @@ export default function Home() {
               {[0, 1, 2].map((item) => (
                 <div
                   key={item}
-                  className="animate-pulse rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70"
                 >
-                  <div className="h-5 w-2/3 rounded bg-slate-200" />
-                  <div className="mt-4 h-4 w-full rounded bg-slate-100" />
-                  <div className="mt-2 h-4 w-1/2 rounded bg-slate-100" />
+                  <div className="animate-pulse">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="h-5 w-40 rounded-full bg-slate-200" />
+                      <div className="h-10 w-20 rounded-xl bg-slate-100" />
+                    </div>
+                    <div className="mt-5 h-6 w-2/3 rounded bg-slate-200" />
+                    <div className="mt-4 h-4 w-full rounded bg-slate-100" />
+                    <div className="mt-2 h-4 w-1/2 rounded bg-slate-100" />
+                  </div>
                 </div>
               ))}
             </div>
           ) : null}
 
           {!loading && searched && !error && places.length === 0 ? (
-            <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+            <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm shadow-slate-200/70">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 ring-1 ring-slate-200">
                 <svg
                   aria-hidden="true"
-                  className="h-7 w-7"
+                  className="h-8 w-8"
                   fill="none"
                   stroke="currentColor"
                   strokeLinecap="round"
@@ -705,7 +733,7 @@ export default function Home() {
                   <path d="M4 7h16M6 7v12h12V7M9 11h6M9 15h4" />
                 </svg>
               </div>
-              <h3 className="mt-4 text-lg font-semibold">No matching places found</h3>
+              <h3 className="mt-5 text-lg font-semibold tracking-tight">No matching places found</h3>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
                 Try a broader keyword, a nearby subdistrict, or another category.
               </p>
@@ -721,12 +749,12 @@ export default function Home() {
               ].map(([number, title, body]) => (
                 <div
                   key={number}
-                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm"
+                  className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-sm font-semibold text-white shadow-md shadow-slate-200">
                     {number}
                   </div>
-                  <div className="mt-4 font-semibold">{title}</div>
+                  <div className="mt-4 font-semibold text-slate-950">{title}</div>
                   <p className="mt-2 text-sm leading-6 text-slate-500">{body}</p>
                 </div>
               ))}
@@ -746,15 +774,16 @@ export default function Home() {
                 return (
                   <article
                     key={place.id}
-                    className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-teal-200 hover:shadow-md"
+                    className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/70 transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-100/60"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${selectedCategory.tone}`}>
+                          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${selectedCategory.tone}`}>
+                            <InfoIcon path={selectedCategory.icon} />
                             {selectedCategory.label}
                           </span>
-                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">
+                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
                             {place.category.replace(/_/g, " ")}
                           </span>
                         </div>
@@ -765,7 +794,7 @@ export default function Home() {
                       </div>
 
                       <a
-                        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-teal-600 px-3 text-sm font-semibold text-white transition hover:bg-teal-700"
+                        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-teal-600 px-3 text-sm font-semibold text-white shadow-sm shadow-teal-200 transition hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-100"
                         href={mapUrl}
                         rel="noreferrer"
                         target="_blank"
@@ -776,7 +805,7 @@ export default function Home() {
                     </div>
 
                     <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-600">
-                      <span className="rounded-full bg-slate-100 px-3 py-1.5 font-mono">
+                      <span className="rounded-full bg-slate-100 px-3 py-1.5 font-mono ring-1 ring-slate-200">
                         {place.lat.toFixed(5)}, {place.lon.toFixed(5)}
                       </span>
                       {contactItems.map(([label, value]) => {
@@ -785,7 +814,7 @@ export default function Home() {
                         return isWebsite ? (
                           <a
                             key={label}
-                            className="rounded-full bg-slate-100 px-3 py-1.5 text-teal-700 hover:bg-teal-50"
+                            className="rounded-full bg-slate-100 px-3 py-1.5 font-medium text-teal-700 ring-1 ring-slate-200 transition hover:bg-teal-50 hover:ring-teal-200"
                             href={value.startsWith("http") ? value : `https://${value}`}
                             rel="noreferrer"
                             target="_blank"
@@ -793,7 +822,7 @@ export default function Home() {
                             {label}
                           </a>
                         ) : (
-                          <span key={label} className="rounded-full bg-slate-100 px-3 py-1.5">
+                          <span key={label} className="rounded-full bg-slate-100 px-3 py-1.5 ring-1 ring-slate-200">
                             {label}: {value}
                           </span>
                         );

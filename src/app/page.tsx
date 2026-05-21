@@ -36,23 +36,6 @@ type Category = {
   tags: TagQuery[];
 };
 
-type GeocodeResult = {
-  display_name: string;
-  boundingbox: [string, string, string, string];
-};
-
-type OverpassElement = {
-  type: "node" | "way" | "relation";
-  id: number;
-  lat?: number;
-  lon?: number;
-  center?: {
-    lat?: number;
-    lon?: number;
-  };
-  tags?: Record<string, string>;
-};
-
 type Place = {
   id: string;
   name: string;
@@ -61,6 +44,15 @@ type Place = {
   lat: number;
   lon: number;
   tags: Record<string, string>;
+};
+
+type SearchResponse = {
+  scope: "district" | "province";
+  boundaryName: string;
+  categoryLabel: string;
+  count: number;
+  places: Place[];
+  error?: string;
 };
 
 const THAI_PROVINCES = [
@@ -293,170 +285,8 @@ const DEFAULT_CATEGORY = CATEGORIES[0].key;
 const textInputClass =
   "h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-100";
 
-const normalize = (value: string) => value.trim().toLocaleLowerCase("th-TH");
-
 const getCategory = (key: CategoryKey) =>
   CATEGORIES.find((category) => category.key === key) ?? CATEGORIES[0];
-
-const buildNominatimUrl = (query: string) => {
-  const params = new URLSearchParams({
-    q: `${query}, ประเทศไทย`,
-    format: "jsonv2",
-    addressdetails: "1",
-    limit: "1",
-    countrycodes: "th",
-    "accept-language": "th,en",
-  });
-
-  return `https://nominatim.openstreetmap.org/search?${params.toString()}`;
-};
-
-const geocode = async (
-  province: string,
-  district: string,
-): Promise<{ result: GeocodeResult; scope: "district" | "province" }> => {
-  const districtQuery = district ? `${district}, ${province}` : "";
-
-  if (districtQuery) {
-    const districtResponse = await fetch(buildNominatimUrl(districtQuery));
-    if (!districtResponse.ok) {
-      throw new Error("Nominatim could not be reached.");
-    }
-    const districtResults = (await districtResponse.json()) as GeocodeResult[];
-    if (districtResults[0]?.boundingbox) {
-      return { result: districtResults[0], scope: "district" };
-    }
-  }
-
-  const provinceResponse = await fetch(buildNominatimUrl(province));
-  if (!provinceResponse.ok) {
-    throw new Error("Nominatim could not be reached.");
-  }
-  const provinceResults = (await provinceResponse.json()) as GeocodeResult[];
-
-  if (!provinceResults[0]?.boundingbox) {
-    throw new Error("No usable map boundary was found for this province.");
-  }
-
-  return { result: provinceResults[0], scope: "province" };
-};
-
-const escapeOverpassValue = (value: string) =>
-  value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-
-const buildOverpassQuery = (category: Category, bbox: [string, string, string, string]) => {
-  const [south, north, west, east] = bbox;
-  const bounds = `${south},${west},${north},${east}`;
-  const clauses = category.tags
-    .flatMap((tag) => [
-      `node["${tag.key}"="${escapeOverpassValue(tag.value)}"](${bounds});`,
-      `way["${tag.key}"="${escapeOverpassValue(tag.value)}"](${bounds});`,
-      `relation["${tag.key}"="${escapeOverpassValue(tag.value)}"](${bounds});`,
-    ])
-    .join("\n");
-
-  return `[out:json][timeout:25];
-(
-${clauses}
-);
-out center;`;
-};
-
-const queryOverpass = async (category: Category, bbox: [string, string, string, string]) => {
-  const response = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-    },
-    body: new URLSearchParams({ data: buildOverpassQuery(category, bbox) }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Overpass API could not complete the search. Try again in a moment.");
-  }
-
-  return (await response.json()) as { elements?: OverpassElement[] };
-};
-
-const hasKeyword = (place: Place, keyword: string) => {
-  const needle = normalize(keyword);
-  if (!needle) {
-    return true;
-  }
-
-  const searchable = [
-    place.name,
-    place.address,
-    ...Object.entries(place.tags).flatMap(([key, value]) => [key, value]),
-  ]
-    .join(" ")
-    .toLocaleLowerCase("th-TH");
-
-  return searchable.includes(needle);
-};
-
-const formatAddress = (tags: Record<string, string>) => {
-  const parts = [
-    tags["addr:housenumber"],
-    tags["addr:street"],
-    tags["addr:subdistrict"],
-    tags["addr:district"],
-    tags["addr:city"],
-    tags["addr:province"],
-  ].filter(Boolean);
-
-  return parts.length > 0
-    ? parts.join(", ")
-    : tags["addr:full"] || tags["addr:place"] || tags["is_in"] || "Area details not listed";
-};
-
-const elementToPlace = (element: OverpassElement, fallbackCategory: string): Place | null => {
-  const lat = element.lat ?? element.center?.lat;
-  const lon = element.lon ?? element.center?.lon;
-  const tags = element.tags ?? {};
-
-  if (typeof lat !== "number" || typeof lon !== "number") {
-    return null;
-  }
-
-  return {
-    id: `${element.type}-${element.id}`,
-    name: tags.name || tags["name:th"] || tags["name:en"] || "Unnamed place",
-    category: tags.amenity || tags.shop || tags.tourism || fallbackCategory,
-    address: formatAddress(tags),
-    lat,
-    lon,
-    tags,
-  };
-};
-
-const collectPlaces = (
-  elements: OverpassElement[],
-  category: Category,
-  keyword: string,
-) => {
-  const seen = new Map<string, Place>();
-
-  for (const element of elements) {
-    const place = elementToPlace(element, category.label);
-    if (!place || !hasKeyword(place, keyword)) {
-      continue;
-    }
-
-    const fuzzyKey =
-      place.name === "Unnamed place"
-        ? place.id
-        : `${normalize(place.name)}:${place.lat.toFixed(5)}:${place.lon.toFixed(5)}`;
-
-    if (!seen.has(fuzzyKey)) {
-      seen.set(fuzzyKey, place);
-    }
-  }
-
-  return Array.from(seen.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, "th"),
-  );
-};
 
 const InfoIcon = ({ path }: { path: string }) => (
   <svg
@@ -512,16 +342,30 @@ export default function Home() {
     setBoundaryName("");
 
     try {
-      const geocoded = await geocode(province, district.trim());
-      const overpassData = await queryOverpass(selectedCategory, geocoded.result.boundingbox);
-      const nextPlaces = collectPlaces(overpassData.elements ?? [], selectedCategory, keyword);
+      const response = await fetch("/api/search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          province,
+          district: district.trim(),
+          keyword,
+          category: categoryKey,
+        }),
+      });
+      const searchData = (await response.json()) as SearchResponse;
 
-      setPlaces(nextPlaces);
-      setBoundaryName(geocoded.result.display_name);
+      if (!response.ok) {
+        throw new Error(searchData.error || "Search failed. Please try again.");
+      }
+
+      setPlaces(searchData.places);
+      setBoundaryName(searchData.boundaryName);
       setScopeNote(
-        geocoded.scope === "province" && district.trim()
+        searchData.scope === "province" && district.trim()
           ? `District lookup for "${district.trim()}" did not return a boundary, so this searched all of ${province}.`
-          : `Searched within ${geocoded.scope === "district" ? district.trim() : province}.`,
+          : `Searched within ${searchData.scope === "district" ? district.trim() : province}.`,
       );
     } catch (searchError) {
       setError(

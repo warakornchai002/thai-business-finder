@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
 type CategoryKey =
   | "restaurant"
@@ -47,7 +47,7 @@ type Place = {
 };
 
 type SearchResponse = {
-  scope: "district" | "province";
+  scope: "subdistrict" | "district" | "province";
   boundaryName: string;
   categoryLabel: string;
   count: number;
@@ -55,85 +55,20 @@ type SearchResponse = {
   error?: string;
 };
 
-const THAI_PROVINCES = [
-  "กรุงเทพมหานคร",
-  "กระบี่",
-  "กาญจนบุรี",
-  "กาฬสินธุ์",
-  "กำแพงเพชร",
-  "ขอนแก่น",
-  "จันทบุรี",
-  "ฉะเชิงเทรา",
-  "ชลบุรี",
-  "ชัยนาท",
-  "ชัยภูมิ",
-  "ชุมพร",
-  "เชียงราย",
-  "เชียงใหม่",
-  "ตรัง",
-  "ตราด",
-  "ตาก",
-  "นครนายก",
-  "นครปฐม",
-  "นครพนม",
-  "นครราชสีมา",
-  "นครศรีธรรมราช",
-  "นครสวรรค์",
-  "นนทบุรี",
-  "นราธิวาส",
-  "น่าน",
-  "บึงกาฬ",
-  "บุรีรัมย์",
-  "ปทุมธานี",
-  "ประจวบคีรีขันธ์",
-  "ปราจีนบุรี",
-  "ปัตตานี",
-  "พระนครศรีอยุธยา",
-  "พะเยา",
-  "พังงา",
-  "พัทลุง",
-  "พิจิตร",
-  "พิษณุโลก",
-  "เพชรบุรี",
-  "เพชรบูรณ์",
-  "แพร่",
-  "ภูเก็ต",
-  "มหาสารคาม",
-  "มุกดาหาร",
-  "แม่ฮ่องสอน",
-  "ยโสธร",
-  "ยะลา",
-  "ร้อยเอ็ด",
-  "ระนอง",
-  "ระยอง",
-  "ราชบุรี",
-  "ลพบุรี",
-  "ลำปาง",
-  "ลำพูน",
-  "เลย",
-  "ศรีสะเกษ",
-  "สกลนคร",
-  "สงขลา",
-  "สตูล",
-  "สมุทรปราการ",
-  "สมุทรสงคราม",
-  "สมุทรสาคร",
-  "สระแก้ว",
-  "สระบุรี",
-  "สิงห์บุรี",
-  "สุโขทัย",
-  "สุพรรณบุรี",
-  "สุราษฎร์ธานี",
-  "สุรินทร์",
-  "หนองคาย",
-  "หนองบัวลำภู",
-  "อ่างทอง",
-  "อำนาจเจริญ",
-  "อุดรธานี",
-  "อุตรดิตถ์",
-  "อุทัยธานี",
-  "อุบลราชธานี",
-] as const;
+type ProvincesResponse = {
+  provinces?: string[];
+  error?: string;
+};
+
+type DistrictsResponse = {
+  districts?: string[];
+  error?: string;
+};
+
+type SubdistrictsResponse = {
+  subdistricts?: string[];
+  error?: string;
+};
 
 const CATEGORIES: Category[] = [
   {
@@ -288,6 +223,20 @@ const textInputClass =
 const getCategory = (key: CategoryKey) =>
   CATEGORIES.find((category) => category.key === key) ?? CATEGORIES[0];
 
+const fetchGeography = async <ResponseData,>(
+  path: string,
+  signal: AbortSignal,
+): Promise<ResponseData> => {
+  const response = await fetch(path, { signal });
+  const data = (await response.json()) as ResponseData & { error?: string };
+
+  if (!response.ok) {
+    throw new Error(data.error || "Could not load geography options.");
+  }
+
+  return data;
+};
+
 const InfoIcon = ({ path }: { path: string }) => (
   <svg
     aria-hidden="true"
@@ -319,8 +268,13 @@ const ExternalIcon = () => (
 );
 
 export default function Home() {
-  const [province, setProvince] = useState<string>("เชียงใหม่");
-  const [district, setDistrict] = useState<string>("เมืองเชียงใหม่");
+  const [provinces, setProvinces] = useState<string[]>([]);
+  const [districts, setDistricts] = useState<string[]>([]);
+  const [subdistricts, setSubdistricts] = useState<string[]>([]);
+  const [province, setProvince] = useState<string>("");
+  const [district, setDistrict] = useState<string>("");
+  const [subdistrict, setSubdistrict] = useState<string>("");
+  const [geographyLoading, setGeographyLoading] = useState(true);
   const [keyword, setKeyword] = useState<string>("");
   const [categoryKey, setCategoryKey] = useState<CategoryKey>(DEFAULT_CATEGORY);
   const [places, setPlaces] = useState<Place[]>([]);
@@ -332,8 +286,139 @@ export default function Home() {
 
   const selectedCategory = useMemo(() => getCategory(categoryKey), [categoryKey]);
 
+  const handleProvinceChange = (nextProvince: string) => {
+    setProvince(nextProvince);
+    setDistricts([]);
+    setDistrict("");
+    setSubdistricts([]);
+    setSubdistrict("");
+  };
+
+  const handleDistrictChange = (nextDistrict: string) => {
+    setDistrict(nextDistrict);
+    setSubdistricts([]);
+    setSubdistrict("");
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const loadProvinces = async () => {
+      try {
+        setGeographyLoading(true);
+        setError("");
+        const data = await fetchGeography<ProvincesResponse>(
+          "/api/geography",
+          controller.signal,
+        );
+        const nextProvinces = data.provinces ?? [];
+
+        setProvinces(nextProvinces);
+        setProvince((currentProvince) =>
+          currentProvince && nextProvinces.includes(currentProvince)
+            ? currentProvince
+            : nextProvinces[0] ?? "",
+        );
+      } catch (geographyError) {
+        if (!controller.signal.aborted) {
+          setError(
+            geographyError instanceof Error
+              ? geographyError.message
+              : "Could not load geography options.",
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setGeographyLoading(false);
+        }
+      }
+    };
+
+    loadProvinces();
+
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    if (!province) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const loadDistricts = async () => {
+      try {
+        const params = new URLSearchParams({ province });
+        const data = await fetchGeography<DistrictsResponse>(
+          `/api/geography?${params.toString()}`,
+          controller.signal,
+        );
+        const nextDistricts = data.districts ?? [];
+
+        setDistricts(nextDistricts);
+        setDistrict(nextDistricts[0] ?? "");
+      } catch (geographyError) {
+        if (!controller.signal.aborted) {
+          setDistricts([]);
+          setDistrict("");
+          setError(
+            geographyError instanceof Error
+              ? geographyError.message
+              : "Could not load district options.",
+          );
+        }
+      }
+    };
+
+    loadDistricts();
+
+    return () => controller.abort();
+  }, [province]);
+
+  useEffect(() => {
+    if (!province || !district) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const loadSubdistricts = async () => {
+      try {
+        const params = new URLSearchParams({ province, district });
+        const data = await fetchGeography<SubdistrictsResponse>(
+          `/api/geography?${params.toString()}`,
+          controller.signal,
+        );
+        const nextSubdistricts = data.subdistricts ?? [];
+
+        setSubdistricts(nextSubdistricts);
+        setSubdistrict(nextSubdistricts[0] ?? "");
+      } catch (geographyError) {
+        if (!controller.signal.aborted) {
+          setSubdistricts([]);
+          setSubdistrict("");
+          setError(
+            geographyError instanceof Error
+              ? geographyError.message
+              : "Could not load subdistrict options.",
+          );
+        }
+      }
+    };
+
+    loadSubdistricts();
+
+    return () => controller.abort();
+  }, [province, district]);
+
   const handleSearch = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!province || !district || !subdistrict) {
+      setError("Choose a province, district, and subdistrict before searching.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSearched(true);
@@ -349,7 +434,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           province,
-          district: district.trim(),
+          district,
+          subdistrict,
           keyword,
           category: categoryKey,
         }),
@@ -363,9 +449,11 @@ export default function Home() {
       setPlaces(searchData.places);
       setBoundaryName(searchData.boundaryName);
       setScopeNote(
-        searchData.scope === "province" && district.trim()
-          ? `District lookup for "${district.trim()}" did not return a boundary, so this searched all of ${province}.`
-          : `Searched within ${searchData.scope === "district" ? district.trim() : province}.`,
+        searchData.scope === "subdistrict"
+          ? `Searched within ${subdistrict}, ${district}, ${province}.`
+          : searchData.scope === "district"
+            ? `Subdistrict lookup for "${subdistrict}" did not return a boundary, so this searched ${district}, ${province}.`
+            : `Local boundary lookup did not return a district or subdistrict boundary, so this searched all of ${province}.`,
       );
     } catch (searchError) {
       setError(
@@ -416,7 +504,7 @@ export default function Home() {
 
           <form
             onSubmit={handleSearch}
-            className="grid gap-3 rounded-[2rem] border border-slate-200 bg-slate-50 p-3 shadow-xl shadow-slate-200/70 md:grid-cols-2 lg:grid-cols-[1.1fr_1fr_1fr_auto]"
+            className="grid gap-3 rounded-[2rem] border border-slate-200 bg-slate-50 p-3 shadow-xl shadow-slate-200/70 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_auto]"
           >
             <label className="space-y-2">
               <span className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -424,10 +512,11 @@ export default function Home() {
               </span>
               <select
                 className={textInputClass}
+                disabled={geographyLoading || provinces.length === 0}
                 value={province}
-                onChange={(event) => setProvince(event.target.value)}
+                onChange={(event) => handleProvinceChange(event.target.value)}
               >
-                {THAI_PROVINCES.map((thaiProvince) => (
+                {provinces.map((thaiProvince) => (
                   <option key={thaiProvince} value={thaiProvince}>
                     {thaiProvince}
                   </option>
@@ -439,13 +528,36 @@ export default function Home() {
               <span className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                 District
               </span>
-              <input
+              <select
                 className={textInputClass}
-                placeholder="เช่น เมืองเชียงใหม่"
-                type="text"
+                disabled={geographyLoading || districts.length === 0}
                 value={district}
-                onChange={(event) => setDistrict(event.target.value)}
-              />
+                onChange={(event) => handleDistrictChange(event.target.value)}
+              >
+                {districts.map((thaiDistrict) => (
+                  <option key={thaiDistrict} value={thaiDistrict}>
+                    {thaiDistrict}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="space-y-2">
+              <span className="px-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Subdistrict
+              </span>
+              <select
+                className={textInputClass}
+                disabled={geographyLoading || subdistricts.length === 0}
+                value={subdistrict}
+                onChange={(event) => setSubdistrict(event.target.value)}
+              >
+                {subdistricts.map((thaiSubdistrict) => (
+                  <option key={thaiSubdistrict} value={thaiSubdistrict}>
+                    {thaiSubdistrict}
+                  </option>
+                ))}
+              </select>
             </label>
 
             <label className="space-y-2">
@@ -463,7 +575,7 @@ export default function Home() {
 
             <button
               className="mt-5 inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-6 text-sm font-semibold text-white shadow-lg shadow-slate-300 transition hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-100 disabled:cursor-not-allowed disabled:bg-slate-400 lg:mt-8"
-              disabled={loading}
+              disabled={loading || geographyLoading || !province || !district || !subdistrict}
               type="submit"
             >
               <svg
@@ -478,7 +590,7 @@ export default function Home() {
               >
                 <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
               </svg>
-              {loading ? "Searching" : "Search"}
+              {loading ? "Searching" : geographyLoading ? "Loading" : "Search"}
             </button>
           </form>
         </div>
@@ -539,7 +651,7 @@ export default function Home() {
                   {searched ? `${places.length} result${places.length === 1 ? "" : "s"}` : "Ready to search"}
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {scopeNote || "Choose a province, district, and category to query live map data."}
+                  {scopeNote || "Choose a province, district, subdistrict, and category to query live map data."}
                 </p>
               </div>
               <div className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ${selectedCategory.tone}`}>
@@ -595,8 +707,7 @@ export default function Home() {
               </div>
               <h3 className="mt-4 text-lg font-semibold">No matching places found</h3>
               <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Try a broader keyword, another nearby district spelling, or search at the
-                province level by leaving the district field empty.
+                Try a broader keyword, a nearby subdistrict, or another category.
               </p>
             </div>
           ) : null}
@@ -605,7 +716,7 @@ export default function Home() {
             <div className="grid gap-4 md:grid-cols-3">
               {[
                 ["1", "Pick a province", "All 77 Thai provinces are available."],
-                ["2", "Add a district", "Thai or English district names can work."],
+                ["2", "Pick local area", "District and subdistrict options update automatically."],
                 ["3", "Query OSM", "Results come directly from Nominatim and Overpass."],
               ].map(([number, title, body]) => (
                 <div

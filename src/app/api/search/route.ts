@@ -33,6 +33,7 @@ type Category = {
 type SearchBody = {
   province?: unknown;
   district?: unknown;
+  subdistrict?: unknown;
   keyword?: unknown;
   category?: unknown;
 };
@@ -183,7 +184,18 @@ const findStrictBoundary = (results: NominatimResult[]): BoundaryResult | undefi
 const geocode = async (
   province: string,
   district: string,
-): Promise<{ result: BoundaryResult; scope: "district" | "province" }> => {
+  subdistrict: string,
+): Promise<{ result: BoundaryResult; scope: "subdistrict" | "district" | "province" }> => {
+  if (subdistrict && district) {
+    const subdistrictBoundary = findStrictBoundary(
+      await fetchNominatim(`${subdistrict}, ${district}, ${province}`),
+    );
+
+    if (subdistrictBoundary?.boundingbox) {
+      return { result: subdistrictBoundary, scope: "subdistrict" };
+    }
+  }
+
   if (district) {
     const districtBoundary = findStrictBoundary(await fetchNominatim(`${district}, ${province}`));
 
@@ -345,6 +357,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as SearchBody;
     const province = getString(body.province);
     const district = getString(body.district);
+    const subdistrict = getString(body.subdistrict);
     const keyword = getString(body.keyword);
     const category = getCategory(body.category);
 
@@ -352,7 +365,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Province is required." }, { status: 400 });
     }
 
-    const geocoded = await geocode(province, district);
+    const geocoded = await geocode(province, district, subdistrict);
     const overpassData = await queryOverpass(category, geocoded.result.boundingbox);
     const places = collectPlaces(overpassData.elements ?? [], category, keyword);
 

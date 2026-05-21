@@ -627,34 +627,34 @@ export default function Home() {
                 POI tags
               </span>
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1">
-              {CATEGORIES.map((category) => {
-                const active = category.key === categoryKey;
+            <div className="space-y-4">
+              <label className="block space-y-2">
+                <span className="px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Business type
+                </span>
+                <select
+                  className={textInputClass}
+                  value={categoryKey}
+                  onChange={(event) => setCategoryKey(event.target.value as CategoryKey)}
+                >
+                  {CATEGORIES.map((category) => (
+                    <option key={category.key} value={category.key}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-                return (
-                  <button
-                    key={category.key}
-                    className={`group flex min-h-14 items-center gap-3 rounded-2xl border px-3 py-2.5 text-left text-sm font-semibold transition ${
-                      active
-                        ? "border-slate-900 bg-slate-950 text-white shadow-md shadow-slate-200"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50/70 hover:text-teal-900"
-                    }`}
-                    type="button"
-                    onClick={() => setCategoryKey(category.key)}
-                  >
-                    <span
-                      className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 transition ${
-                        active
-                          ? "bg-white/10 text-white ring-white/20"
-                          : `${category.tone} group-hover:bg-white`
-                      }`}
-                    >
-                      <InfoIcon path={category.icon} />
-                    </span>
-                    <span className="min-w-0">{category.label}</span>
-                  </button>
-                );
-              })}
+              <p className="px-1 text-sm leading-6 text-slate-500">
+                Pick one category to shape the OpenStreetMap tag query.
+              </p>
+
+              <div
+                className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold ring-1 ${selectedCategory.tone}`}
+              >
+                <InfoIcon path={selectedCategory.icon} />
+                {selectedCategory.label}
+              </div>
             </div>
           </div>
 

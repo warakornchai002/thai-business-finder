@@ -154,8 +154,9 @@ const fetchNominatim = async (query: string) => {
   const response = await fetch(buildNominatimUrl(query), {
     cache: "no-store",
     headers: {
-      "User-Agent": "thai-business-finder/0.1",
-      Referer: "https://thai-business-finder.local",
+      Accept: "application/json",
+      "User-Agent": "ThaiBusinessFinder/1.0 (+https://thai-business-finder.vercel.app)",
+      Referer: "https://thai-business-finder.vercel.app",
     },
   });
 
@@ -242,9 +243,11 @@ const fetchOverpassEndpoint = async (
       method: "POST",
       cache: "no-store",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        "User-Agent": "ThaiBusinessFinder/1.0 (+https://thai-business-finder.vercel.app)",
       },
-      body: new URLSearchParams({ data: query }),
+      body: `data=${encodeURIComponent(query)}`,
       signal: controller.signal,
     });
 

@@ -103,21 +103,23 @@ export default function Home() {
         <div className="relative min-h-[420px] lg:min-h-[640px]">
           <div className="absolute inset-x-8 bottom-8 top-10 rounded-full bg-[#d8b268]/12 blur-3xl" />
           <div className="absolute right-0 top-0 hidden h-40 w-40 rounded-full border border-[#d8b268]/30 lg:block" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/PREMIUM_AND_LUXURY_GELATO_IN_DUBAI.png/250px-PREMIUM_AND_LUXURY_GELATO_IN_DUBAI.png"
-            alt="A premium luxury gelato dessert"
-            width={250}
-            height={250}
-            loading="eager"
-            className="relative z-10 mx-auto h-auto w-[82vw] max-w-[560px] object-contain object-center mix-blend-multiply sm:w-[68vw] lg:w-full lg:max-w-[640px] [filter:drop-shadow(0_0_34px_rgba(216,178,104,0.22))_drop-shadow(0_58px_58px_rgba(0,0,0,0.72))_brightness(1.08)_contrast(1.18)_saturate(1.2)]"
-          />
+          <div className="relative z-10 mx-auto w-[82vw] max-w-[560px] rounded-[2rem] border border-[#d8b268]/28 bg-[#07150f] p-3 shadow-[0_36px_90px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.05)] sm:w-[68vw] lg:w-full lg:max-w-[640px]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Dessert_for_Chef%27s_table%2C_Mainz.jpg/960px-Dessert_for_Chef%27s_table%2C_Mainz.jpg?_=20240624132741"
+              alt="A plated fine-dining dessert with cream, fruit, and delicate garnish"
+              width={960}
+              height={640}
+              loading="eager"
+              className="aspect-[4/3] w-full rounded-[1.45rem] object-cover object-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+            />
+          </div>
           <div className="absolute bottom-2 left-2 z-20 max-w-60 rounded-2xl border border-white/10 bg-[#092419]/82 p-5 shadow-2xl backdrop-blur">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#d6ad60]">
               Tonight
             </p>
             <p className="mt-2 font-serif text-2xl text-[#fff8e8]">
-              Lemongrass coal grill
+              Jasmine cream finale
             </p>
           </div>
         </div>

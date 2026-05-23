@@ -103,13 +103,14 @@ export default function Home() {
         <div className="relative min-h-[420px] lg:min-h-[640px]">
           <div className="absolute inset-x-8 bottom-8 top-10 rounded-full bg-[#d8b268]/12 blur-3xl" />
           <div className="absolute right-0 top-0 hidden h-40 w-40 rounded-full border border-[#d8b268]/30 lg:block" />
-          <Image
-            src="/landing-assets/hero-dish.svg"
-            alt="A plated Thai dish with herbs and warm gold accents"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Classic_Platter_for_2_-_Rosa%27s_Thai_2025-07-22.jpg/960px-Classic_Platter_for_2_-_Rosa%27s_Thai_2025-07-22.jpg"
+            alt="A premium Thai sharing platter with grilled skewers, curry, rice, and fresh garnishes"
             width={960}
             height={720}
-            priority
-            className="relative z-10 mx-auto h-auto w-full max-w-[680px] drop-shadow-[0_42px_60px_rgba(0,0,0,0.45)]"
+            loading="eager"
+            className="relative z-10 mx-auto h-[420px] w-full max-w-[680px] rounded-[2rem] border border-[#d8b268]/25 object-cover object-center shadow-[0_42px_80px_rgba(0,0,0,0.48)] sm:h-[520px] lg:h-[600px]"
           />
           <div className="absolute bottom-2 left-2 z-20 max-w-60 rounded-2xl border border-white/10 bg-[#092419]/82 p-5 shadow-2xl backdrop-blur">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#d6ad60]">

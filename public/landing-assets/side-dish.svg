@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" role="img" aria-label="Small side dish illustration">
+  <defs>
+    <radialGradient id="plate" cx="44%" cy="36%" r="66%">
+      <stop offset="0" stop-color="#fbefd6"/>
+      <stop offset="0.5" stop-color="#caa66b"/>
+      <stop offset="1" stop-color="#0a271c"/>
+    </radialGradient>
+    <radialGradient id="dip" cx="46%" cy="34%" r="58%">
+      <stop offset="0" stop-color="#f3c36d"/>
+      <stop offset="0.62" stop-color="#7b4a25"/>
+      <stop offset="1" stop-color="#122f22"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#b7ce78"/>
+      <stop offset="0.5" stop-color="#4c8d5c"/>
+      <stop offset="1" stop-color="#103727"/>
+    </linearGradient>
+    <filter id="shadow" x="-18%" y="-18%" width="136%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#020705" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <rect width="520" height="420" fill="none"/>
+  <ellipse cx="260" cy="326" rx="166" ry="36" fill="#020705" opacity="0.28"/>
+  <g filter="url(#shadow)">
+    <ellipse cx="260" cy="225" rx="182" ry="105" fill="url(#plate)"/>
+    <ellipse cx="260" cy="214" rx="122" ry="68" fill="#0d2f21"/>
+    <ellipse cx="260" cy="201" rx="94" ry="48" fill="url(#dip)"/>
+  </g>
+  <ellipse cx="196" cy="178" rx="45" ry="17" fill="url(#leaf)" transform="rotate(-32 196 178)"/>
+  <ellipse cx="236" cy="154" rx="51" ry="18" fill="url(#leaf)" transform="rotate(-11 236 154)"/>
+  <ellipse cx="306" cy="154" rx="52" ry="18" fill="url(#leaf)" transform="rotate(15 306 154)"/>
+  <ellipse cx="348" cy="181" rx="42" ry="16" fill="url(#leaf)" transform="rotate(34 348 181)"/>
+  <circle cx="238" cy="206" r="11" fill="#f4cd84"/>
+  <circle cx="282" cy="193" r="9" fill="#d89b4d"/>
+  <circle cx="316" cy="218" r="12" fill="#6a8a4b"/>
+  <path d="M168 228c53 39 133 49 202 3" fill="none" stroke="#f1ce84" stroke-width="5" stroke-linecap="round" opacity="0.76"/>
+</svg>

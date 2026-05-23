@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 720" role="img" aria-label="Elegant fork silhouette">
+  <defs>
+    <linearGradient id="steel" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f4d894"/>
+      <stop offset="0.3" stop-color="#9f7f45"/>
+      <stop offset="0.68" stop-color="#274f37"/>
+      <stop offset="1" stop-color="#061a12"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-10%" width="160%" height="120%">
+      <feDropShadow dx="0" dy="18" stdDeviation="12" flood-color="#020705" flood-opacity="0.38"/>
+    </filter>
+  </defs>
+  <rect width="180" height="720" fill="none"/>
+  <g filter="url(#shadow)" fill="url(#steel)">
+    <rect x="73" y="178" width="34" height="474" rx="17"/>
+    <path d="M45 54c0-10 8-18 18-18s18 8 18 18v130c0 10-8 18-18 18s-18-8-18-18V54z"/>
+    <path d="M81 50c0-10 8-18 18-18s18 8 18 18v134c0 10-8 18-18 18s-18-8-18-18V50z"/>
+    <path d="M117 54c0-10 8-18 18-18s18 8 18 18v130c0 10-8 18-18 18s-18-8-18-18V54z"/>
+    <path d="M48 174h104c0 42-24 75-62 75s-42-33-42-75z"/>
+    <ellipse cx="90" cy="652" rx="27" ry="18"/>
+  </g>
+  <path d="M91 202v422" stroke="#f7dda3" stroke-width="4" stroke-linecap="round" opacity="0.34"/>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-label="Dark green leaf background pattern">
+  <defs>
+    <radialGradient id="base" cx="50%" cy="36%" r="76%">
+      <stop offset="0" stop-color="#1f573b"/>
+      <stop offset="0.58" stop-color="#0d2f21"/>
+      <stop offset="1" stop-color="#05150f"/>
+    </radialGradient>
+    <linearGradient id="leaf" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#bdd27b"/>
+      <stop offset="0.42" stop-color="#4f9260"/>
+      <stop offset="1" stop-color="#0a2a1e"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#020705" flood-opacity="0.24"/>
+    </filter>
+  </defs>
+  <rect width="1440" height="900" fill="url(#base)"/>
+  <circle cx="1160" cy="120" r="220" fill="#d1a25d" opacity="0.08"/>
+  <circle cx="210" cy="760" r="260" fill="#91b66b" opacity="0.07"/>
+  <g filter="url(#soft)" opacity="0.64">
+    <ellipse cx="142" cy="128" rx="116" ry="34" fill="url(#leaf)" transform="rotate(-36 142 128)"/>
+    <ellipse cx="1184" cy="174" rx="150" ry="42" fill="url(#leaf)" transform="rotate(27 1184 174)"/>
+    <ellipse cx="1320" cy="608" rx="132" ry="38" fill="url(#leaf)" transform="rotate(-31 1320 608)"/>
+    <ellipse cx="260" cy="626" rx="146" ry="40" fill="url(#leaf)" transform="rotate(20 260 626)"/>
+    <ellipse cx="670" cy="94" rx="112" ry="32" fill="url(#leaf)" transform="rotate(8 670 94)"/>
+    <ellipse cx="854" cy="790" rx="126" ry="35" fill="url(#leaf)" transform="rotate(-16 854 790)"/>
+  </g>
+  <g fill="none" stroke="#e1bd78" stroke-width="2" opacity="0.12">
+    <circle cx="720" cy="452" r="284"/>
+    <circle cx="720" cy="452" r="410"/>
+    <circle cx="720" cy="452" r="548"/>
+  </g>
+</svg>

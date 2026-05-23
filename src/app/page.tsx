@@ -105,12 +105,12 @@ export default function Home() {
           <div className="absolute right-0 top-0 hidden h-40 w-40 rounded-full border border-[#d8b268]/30 lg:block" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Classic_Platter_for_2_-_Rosa%27s_Thai_2025-07-22.jpg/960px-Classic_Platter_for_2_-_Rosa%27s_Thai_2025-07-22.jpg"
-            alt="A premium Thai sharing platter with grilled skewers, curry, rice, and fresh garnishes"
-            width={960}
-            height={720}
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/PREMIUM_AND_LUXURY_GELATO_IN_DUBAI.png/250px-PREMIUM_AND_LUXURY_GELATO_IN_DUBAI.png"
+            alt="A premium luxury gelato dessert"
+            width={250}
+            height={250}
             loading="eager"
-            className="relative z-10 mx-auto h-[420px] w-full max-w-[680px] rounded-[2rem] border border-[#d8b268]/25 object-cover object-center shadow-[0_42px_80px_rgba(0,0,0,0.48)] sm:h-[520px] lg:h-[600px]"
+            className="relative z-10 mx-auto h-auto w-[82vw] max-w-[560px] object-contain object-center mix-blend-multiply sm:w-[68vw] lg:w-full lg:max-w-[640px] [filter:drop-shadow(0_0_34px_rgba(216,178,104,0.22))_drop-shadow(0_58px_58px_rgba(0,0,0,0.72))_brightness(1.08)_contrast(1.18)_saturate(1.2)]"
           />
           <div className="absolute bottom-2 left-2 z-20 max-w-60 rounded-2xl border border-white/10 bg-[#092419]/82 p-5 shadow-2xl backdrop-blur">
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#d6ad60]">
